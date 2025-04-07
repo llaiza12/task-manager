@@ -45,6 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: _controller,
               decoration: InputDecoration(hintText: 'Enter task'),
             ),
+            ElevatedButton(onPressed: () {}, child: Text("Add Task")),
           ],
         ),
       ),

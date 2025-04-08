@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,20 +23,20 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 230, 184, 200),
         ),
       ),
-      home: const MyHomePage(title: 'Task Manager'),
+      home: const TaskListScreen(title: 'Task Manager'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class TaskListScreen extends StatefulWidget {
+  const TaskListScreen({super.key, required this.title});
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<TaskListScreen> createState() => _TaskListScreen();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _TaskListScreen extends State<TaskListScreen> {
   final TextEditingController _controller = TextEditingController();
 
   final CollectionReference _tasks = FirebaseFirestore.instance.collection(
@@ -52,15 +54,23 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            ElevatedButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginPage(title: 'loginpage'),
+                  ),
+                );
+              },
+              child: Text("Logout"),
+            ),
             TextField(
               controller: _controller,
               decoration: InputDecoration(

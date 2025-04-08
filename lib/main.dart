@@ -86,6 +86,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         final DocumentSnapshot documentSnapshot =
                             streamSnapshot.data!.docs[index];
                         return ListTile(
+                          leading: Checkbox(
+                            value: documentSnapshot['checked'],
+                            onChanged: (bool? newValue) {
+                              _tasks.doc(documentSnapshot.id).update({
+                                'checked': newValue,
+                              });
+                            },
+                          ),
                           title: Text(documentSnapshot['name']),
                           trailing: IconButton(
                             icon: Icon(Icons.delete),

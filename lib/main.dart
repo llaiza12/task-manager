@@ -17,7 +17,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Task Manager',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 230, 184, 200),
+        ),
       ),
       home: const MyHomePage(title: 'Task Manager'),
     );
@@ -84,24 +86,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         final DocumentSnapshot documentSnapshot =
                             streamSnapshot.data!.docs[index];
                         return ListTile(
-                          /**leading: Checkbox(
-                              value: checked[index],
-                              onChanged: (bool? newValue) {
-                                setState(() {
-                                  checked[index] = newValue!;
-                                });
-                              },
-                            ),*/
                           title: Text(documentSnapshot['name']),
-                          /*trailing: IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () {
-                                setState(() {
-                                  tasks.removeAt(index);
-                                  checked.removeAt(index);
-                                });
-                              },
-                            ),*/
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () async {
+                              FirebaseFirestore.instance
+                                  .collection('tasks')
+                                  .doc(documentSnapshot.id)
+                                  .delete();
+                            },
+                          ),
                         );
                       },
                     );

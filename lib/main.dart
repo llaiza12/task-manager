@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -29,14 +34,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
-  List<String> tasks = [];
-  List<bool> checked = [];
 
-  void addTask() {
+  final CollectionReference _tasks = FirebaseFirestore.instance.collection(
+    'tasks',
+  );
+
+  Future<void> addTask([DocumentSnapshot? documentSnapshot]) async {
     String userTask = _controller.text;
     setState(() {
-      tasks.add(userTask);
-      checked.add(false);
+      _tasks.add({'name': userTask, 'checked': false});
       _controller.clear();
     });
   }
@@ -49,43 +55,61 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(25),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: 'Enter Task',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: addTask,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
             Expanded(
-              child: ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Checkbox(
-                      value: checked[index],
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          checked[index] = newValue!;
-                        });
+              child: StreamBuilder(
+                stream: _tasks.snapshots(),
+                builder: (
+                  context,
+                  AsyncSnapshot<QuerySnapshot> streamSnapshot,
+                ) {
+                  if (streamSnapshot.hasData) {
+                    return ListView.builder(
+                      itemCount: streamSnapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        final DocumentSnapshot documentSnapshot =
+                            streamSnapshot.data!.docs[index];
+                        return ListTile(
+                          /**leading: Checkbox(
+                              value: checked[index],
+                              onChanged: (bool? newValue) {
+                                setState(() {
+                                  checked[index] = newValue!;
+                                });
+                              },
+                            ),*/
+                          title: Text(documentSnapshot['name']),
+                          /*trailing: IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                setState(() {
+                                  tasks.removeAt(index);
+                                  checked.removeAt(index);
+                                });
+                              },
+                            ),*/
+                        );
                       },
-                    ),
-                    title: Text(tasks[index]),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        setState(() {
-                          tasks.removeAt(index);
-                          checked.removeAt(index);
-                        });
-                      },
-                    ),
-                  );
+                    );
+                  }
+                  return Center(child: Text("No tasks"));
                 },
               ),
             ),
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(hintText: 'Enter Task'),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(onPressed: addTask, child: Text("Add Task")),
           ],
         ),
       ),

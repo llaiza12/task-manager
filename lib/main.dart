@@ -28,6 +28,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class Task {
+  String name;
+  bool checked;
+
+  Task({required this.name, required this.checked});
+}
+
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key, required this.title});
   final String title;
@@ -42,6 +49,14 @@ class _TaskListScreen extends State<TaskListScreen> {
   final CollectionReference _tasks = FirebaseFirestore.instance.collection(
     'tasks',
   );
+
+  List<Task> taskList = [
+    Task(name: 'Do Homework', checked: true),
+    Task(name: 'Exercise', checked: false),
+    Task(name: 'Drink Water', checked: true),
+    Task(name: 'Clean car', checked: false),
+    Task(name: 'Do laundry', checked: false),
+  ];
 
   Future<void> addTask([DocumentSnapshot? documentSnapshot]) async {
     String userTask = _controller.text;
